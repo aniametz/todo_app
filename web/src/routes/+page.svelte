@@ -4,14 +4,18 @@
 		Accordion,
 		AccordionItem,
 		Alert,
+		Badge,
 		Button,
 		ButtonGroup,
 		Checkbox,
 		Input,
+		Select,
 		Table,
 		TableBody,
 		TableBodyCell,
-		TableBodyRow
+		TableBodyRow,
+		TableHead,
+		TableHeadCell
 	} from 'flowbite-svelte';
 	import {
 		ArchiveSolid,
@@ -23,13 +27,14 @@
 
 	import { onMount } from 'svelte';
 	import { createToDoRequest, deleteToDoRequest, getToDosRequest, updateToDoRequest } from '../functions/todo_crud';
-	import type { ToDo } from "../types";
+	import { Priority, PriorityColor, type ToDo } from "../types";
 
 	let todos: ToDo[] = [];
 
 	onMount(async () => (todos = await getToDosRequest()))
 
-	let todoDescription = '';
+	let todoDescription: string = '';
+	let todoPriority: Priority | null = null;
 	let openAlert = false;
 
 	async function createToDo() {
@@ -42,11 +47,13 @@
 		}
 		const newTodo = {
 			description: todoDescription,
+			priority: todoPriority,
 			isDone: false,
 			isArchived: false
 		};
 		await createToDoRequest(newTodo);
 		todoDescription = '';
+		todoPriority = null;
 		todos = await getToDosRequest()
 	}
 
@@ -74,6 +81,12 @@
 		<AccordionItem open>
 			<span slot="header">Current To Dos</span>
 			<Table hoverable={true}>
+				<TableHead>
+					<TableHeadCell class="!p-4"></TableHeadCell>
+					<TableHeadCell>Description</TableHeadCell>
+					<TableHeadCell class="w-40">Priority</TableHeadCell>
+					<TableHeadCell>Actions</TableHeadCell>
+				</TableHead>
 				<TableBody tableBodyClass="divide-y">
 					{#each currentTodos as todo}
 						<TableBodyRow>
@@ -81,6 +94,11 @@
 								<Checkbox checked={todo.isDone} on:click={() => updateToDo({...todo, isDone: !todo.isDone})} />
 							</TableBodyCell>
 							<TableBodyCell>{todo.description}</TableBodyCell>
+							<TableBodyCell class="w-40">
+								<Badge color={PriorityColor[todo.priority ?? 'none']}>
+									{todo.priority ? todo.priority.toUpperCase() : 'NONE'}
+								</Badge>
+							</TableBodyCell>
 							<TableBodyCell>
 								<ButtonGroup class="*:!ring-primary-700">
 									<Button on:click={() => deleteToDo(todo.id)}>
@@ -103,10 +121,20 @@
 							<Input
 								id="todo-description"
 								size="sm"
-								placeholder="To Do description"
 								color={openAlert ? 'red' : undefined}
 								bind:value={todoDescription}
 							/>
+						</TableBodyCell>
+						<TableBodyCell class="w-40">
+							<Select 
+								id="todo-priority"
+								placeholder="Select priority"
+								bind:value={todoPriority} size="sm">
+								<option value={null}>NONE</option>
+								{#each Object.values(Priority) as value}
+									<option value={value}>{value.toUpperCase()}</option>
+								{/each}
+							</Select>
 						</TableBodyCell>
 						<TableBodyCell>
 							<ButtonGroup class="*:!ring-primary-700">

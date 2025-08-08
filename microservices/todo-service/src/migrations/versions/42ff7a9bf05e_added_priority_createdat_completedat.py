@@ -1,4 +1,4 @@
-"""Added priority, createdAt, completedAt to Todo
+"""Added priority, createdAt, completedAt
 
 Revision ID: 42ff7a9bf05e
 Revises: 

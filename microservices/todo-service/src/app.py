@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 
@@ -27,6 +28,9 @@ def create_todo():
 @app.route('/update_todo', methods=["POST"])
 def update_todo():
     data = request.get_json().get("todoData")
+    data["completedAt"] = datetime.now(timezone.utc) if data["isDone"] else None
+    # TODO: find a way to resolve this issue with datetime format from svelte
+    del data["createdAt"]  # createdAt should not be updated because its fromat from svelte is not compatible with the database
     Todo.query.filter_by(id=data["id"]).update(data)
     db.session.commit()
     return jsonify({'message': 'success'})
