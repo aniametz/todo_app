@@ -1,4 +1,4 @@
-"""Priority refactored
+"""Priority type corrected
 
 Revision ID: 22ee4fe28e6e
 Revises: 42ff7a9bf05e
@@ -8,8 +8,6 @@ Create Date: 2025-08-08 23:34:23.921961
 from typing import Sequence, Union
 
 from alembic import op
-import sqlalchemy as sa
-
 
 # revision identifiers, used by Alembic.
 revision: str = '22ee4fe28e6e'
