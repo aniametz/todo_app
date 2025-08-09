@@ -34,7 +34,7 @@
 	onMount(async () => (todos = await getToDosRequest()))
 
 	let todoDescription: string = '';
-	let todoPriority: Priority | null = null;
+	let todoPriority: Priority = Priority.NONE;
 	let openAlert = false;
 
 	async function createToDo() {
@@ -53,7 +53,7 @@
 		};
 		await createToDoRequest(newTodo);
 		todoDescription = '';
-		todoPriority = null;
+		todoPriority = Priority.NONE;
 		todos = await getToDosRequest()
 	}
 
@@ -95,8 +95,8 @@
 							</TableBodyCell>
 							<TableBodyCell>{todo.description}</TableBodyCell>
 							<TableBodyCell class="w-40">
-								<Badge color={PriorityColor[todo.priority ?? 'none']}>
-									{todo.priority ? todo.priority.toUpperCase() : 'NONE'}
+								<Badge color={PriorityColor[todo.priority]}>
+									{todo.priority.toUpperCase()}
 								</Badge>
 							</TableBodyCell>
 							<TableBodyCell>
@@ -130,9 +130,8 @@
 								id="todo-priority"
 								placeholder="Select priority"
 								bind:value={todoPriority} size="sm">
-								<option value={null}>NONE</option>
-								{#each Object.values(Priority) as value}
-									<option value={value}>{value.toUpperCase()}</option>
+								{#each Object.values(Priority) as priorityValue}
+									<option value={priorityValue}>{priorityValue.toUpperCase()}</option>
 								{/each}
 							</Select>
 						</TableBodyCell>

@@ -1,7 +1,7 @@
 export interface ToDo {
 	id?: string;
 	description: string;
-	priority?: Priority | null;
+	priority: Priority;
 	isDone: boolean;
 	isArchived: boolean;
 	createdAt?: string;
@@ -9,9 +9,10 @@ export interface ToDo {
 }
 
 export enum Priority {
-	Low = 'low',
-	Medium = 'medium',
-	High = 'high'
+	NONE = 'none',
+	LOW = 'low',
+	MEDIUM = 'medium',
+	HIGH = 'high'
 }
 
 export type FlowbiteBadgeColor =
@@ -27,9 +28,9 @@ export type FlowbiteBadgeColor =
 	| 'primary'
 	| undefined;
 
-export const PriorityColor: Record<string | 'none', FlowbiteBadgeColor> = {
-	none: 'none',
-	[Priority.Low]: 'green',
-	[Priority.Medium]: 'yellow',
-	[Priority.High]: 'red'
+export const PriorityColor: Record<string, FlowbiteBadgeColor> = {
+	[Priority.NONE]: 'none',
+	[Priority.LOW]: 'green',
+	[Priority.MEDIUM]: 'yellow',
+	[Priority.HIGH]: 'red'
 };
