@@ -27,9 +27,5 @@ export async function deleteToDoRequest(todoData: string): Promise<string> {
 }
 
 export async function getToDosRequest(): Promise<ToDo[]> {
-	const todos = await axios
-		.get(backend_port + '/get_todos')
-		.then((response) => response.data.todos);
-
-	return todos;
+	return await axios.get(backend_port + '/get_todos').then((response) => response.data.todos);
 }

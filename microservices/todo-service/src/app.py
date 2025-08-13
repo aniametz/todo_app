@@ -1,8 +1,11 @@
 from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
+from functions import create_tag_objects, hamming_distance
 
 from data_models.todo import Todo
+from data_models.tag import Tag
+from data_models.todo_tag_association import TodoTagAssociation
 from database import db
 
 from flask_cors import CORS
@@ -20,7 +23,9 @@ with app.app_context():
 @app.route('/create_todo', methods=["POST"])
 def create_todo():
     data = request.get_json().get("todoData")
+    tag_objects = create_tag_objects(data)
     new_todo = Todo(**data)
+    new_todo.tags = tag_objects
     db.session.add(new_todo)
     db.session.commit()
     return jsonify({'message': 'success'})
@@ -29,9 +34,13 @@ def create_todo():
 def update_todo():
     data = request.get_json().get("todoData")
     data["completedAt"] = datetime.now(timezone.utc) if data["isDone"] else None
-    # TODO: find a way to resolve this issue with datetime format from svelte
-    del data["createdAt"]  # createdAt should not be updated because its fromat from svelte is not compatible with the database
+    # createdAt should not be updated because its fromat from svelte is not compatible with the database
+    data.pop("createdAt", None)  
+    tag_objects = create_tag_objects(data)
     Todo.query.filter_by(id=data["id"]).update(data)
+    # tags should not be updated in bulk
+    todo = Todo.query.filter_by(id=data["id"]).first()
+    todo.tags[:] = tag_objects
     db.session.commit()
     return jsonify({'message': 'success'})
 
@@ -46,6 +55,41 @@ def delete_todo():
 def get_todos():
     todos = Todo.query.all()
     return jsonify({"todos": [t.as_dict() for t in todos]})
+
+@app.route('/validate_tag', methods=["POST"])
+def validate_tag():
+    data = request.get_json().get("tagData")
+    tags = Tag.query.all()
+    for tag in tags:
+        lower_tag_name = tag.name.strip().lower()
+        lower_data_name = data["name"].strip().lower()
+        if lower_tag_name == lower_data_name:
+            return jsonify({'message': f'Tag "{tag.name}" already exists'})
+        if hamming_distance(lower_tag_name, lower_data_name) <= 2:
+            return jsonify({'message': f'Tag name "{data["name"]}" is too similar to an existing tag "{tag.name}"'})
+    return jsonify({'message': 'success'})
+
+@app.route('/create_tag', methods=["POST"])
+def create_tag():
+    data = request.get_json().get("tagData")
+    data["name"] = data["name"].strip()
+    new_tag = Tag(**data)
+    db.session.add(new_tag)
+    db.session.commit()
+    return jsonify({'message': 'success'})
+
+@app.route('/delete_tag', methods=["POST"])
+def delete_tag():
+    data = request.get_json().get("tagData")
+    Tag.query.filter_by(id=data).delete()
+    TodoTagAssociation.query.filter_by(tag_id=data).delete()
+    db.session.commit()
+    return jsonify({'message': 'success'})
+
+@app.route('/get_tags')
+def get_tags():
+    tags = Tag.query.all()
+    return jsonify({"tags": [t.as_dict() for t in tags]})
 
 if __name__ == '__main__':
     app.run(debug=True)
