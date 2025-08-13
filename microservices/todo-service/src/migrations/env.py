@@ -19,7 +19,10 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from data_models.todo import Todo
-target_metadata = Todo.metadata
+from data_models.tag import Tag
+from data_models.todo_tag_association import TodoTagAssociation
+from database import db
+target_metadata = db.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

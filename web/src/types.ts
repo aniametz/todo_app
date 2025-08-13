@@ -2,6 +2,7 @@ export interface ToDo {
 	id?: string;
 	description: string;
 	priority: Priority;
+	tags: Tag[];
 	isDone: boolean;
 	isArchived: boolean;
 	createdAt?: string;
@@ -34,3 +35,9 @@ export const PriorityColor: Record<string, FlowbiteBadgeColor> = {
 	[Priority.MEDIUM]: 'yellow',
 	[Priority.HIGH]: 'red'
 };
+
+export interface Tag {
+	id?: string;
+	name: string;
+	color?: string;
+}
