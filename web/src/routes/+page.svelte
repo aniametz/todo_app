@@ -16,7 +16,9 @@
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell
+		TableHeadCell,
+
+		Tooltip
 	} from 'flowbite-svelte';
 	import {
 		ArchiveSolid,
@@ -197,6 +199,7 @@
 						<TableBodyCell>
 							<Input
 								id="todo-description"
+								placeholder="Type todo description"
 								size="sm"
 								color={openAlert ? 'red' : undefined}
 								bind:value={todoDescription}
@@ -211,8 +214,10 @@
 									<option value={priorityValue}>{priorityValue.toUpperCase()}</option>
 								{/each}
 							</Select>
+							<Tooltip>Select priority</Tooltip>
 						</TableBodyCell>
 						<TableBodyCell class="w-80">
+							<!-- TODO: fix the issue with Multiselect hidden dropdown -->
 							<MultiSelect placeholder="Select tags" items={tagItems} bind:value={todoTags} />
 						</TableBodyCell>
 						<TableBodyCell>
@@ -265,6 +270,7 @@
 							<Input
 								id="tag-name"
 								size="sm"
+								placeholder="Type tag name"
 								color={openTagAlert ? 'red' : undefined}
 								bind:value={newTag.name}
 							/>
@@ -272,6 +278,7 @@
 						<TableBodyCell>
 							<div class="flex items-center gap-2">
 								<Input type="color" size="sm" bind:value={newTag.color} />
+								<Tooltip>Select color</Tooltip>
 								<Badge style={adjustTagColorStyle(newTag.color)}>new tag</Badge>
 							</div>
 						</TableBodyCell>

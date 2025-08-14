@@ -66,9 +66,6 @@ def validate_tag():
         lower_data_name = data["name"].strip().lower()
         if lower_tag_name == lower_data_name:
             return jsonify({'message': f'Tag "{tag.name}" already exists'})
-        print(f"Comparing '{lower_tag_name}' with '{lower_data_name}'")
-        print(f"Hamming distance: {hamming(lower_tag_name, lower_data_name)}")
-        print(f"Levenshtein distance: {distance(lower_tag_name, lower_data_name)}")
         if hamming(lower_tag_name, lower_data_name) <= 2:
             return jsonify({'message': f'Tag name "{data["name"]}" is too similar to an existing tag "{tag.name}"'})
         if distance(lower_tag_name, lower_data_name) <= 4:
