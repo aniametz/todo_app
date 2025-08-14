@@ -35,7 +35,8 @@ def create_todo():
 @app.route('/update_todo', methods=["POST"])
 def update_todo():
     data = request.get_json().get("todoData")
-    data["dueDate"] = convert_iso_to_datetime(data["dueDate"] if "dueDate" in data else None)
+    # TODO clean up date time conversion mess
+    data["dueDate"] = datetime.strptime(data["dueDate"], '%a, %d %b %Y %H:%M:%S %Z') if ("dueDate" in data and data["dueDate"]) else None
     data["completedAt"] = datetime.now(timezone.utc) if data["isDone"] else None
     # createdAt should not be updated (besides its fromat from svelte is not compatible with the database)
     data.pop("createdAt", None)  
@@ -71,7 +72,9 @@ def validate_tag():
             return jsonify({'message': f'Tag "{tag.name}" already exists'})
         if hamming(lower_tag_name, lower_data_name) <= 2:
             return jsonify({'message': f'Tag name "{data["name"]}" is too similar to an existing tag "{tag.name}"'})
-        if distance(lower_tag_name, lower_data_name) <= 4:
+        # TODO: adjust parameters? to not be too strict (for examaple "room" and "sport" give distance 4)
+        # also there is a problem with words that end with "ing"
+        if distance(lower_tag_name, lower_data_name) <= 3:
             return jsonify({'message': f'Tag name "{data["name"]}" is too similar to an existing tag "{tag.name}"'})
     return jsonify({'message': 'success'})
 

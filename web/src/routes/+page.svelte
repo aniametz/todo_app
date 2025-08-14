@@ -28,20 +28,16 @@
 	} from 'flowbite-svelte-icons';
 	import Navbar from './navbar.svelte';
 
-	import Color from 'color';
 	import { onMount } from 'svelte';
-	import { createTagRequest, deleteTagRequest, getTagsRequest, validateTagRequest } from '../functions/tag_crud';
-	import { createToDoRequest, deleteToDoRequest, getToDosRequest, updateToDoRequest } from '../functions/todo_crud';
+	import ManageTags from '../components/manage_tags.svelte';
+	import { createToDoRequest, deleteToDoRequest, getToDosRequest, updateToDoRequest } from '../data/todo_crud';
+	import { adjustTagColorStyle } from '../functions';
 	import { Priority, PriorityColor, type Tag, type ToDo } from "../types";
 
 	let todos: ToDo[] = [];
-	let tags: Tag[] = [];
-	let tagItems: { value: string; name: string }[] = []
 
 	onMount(async () => {
 		todos = await getToDosRequest();
-		tags = await getTagsRequest();
-		tagItems = tags.map(tag => ({ value: tag.name, name: tag.name }));
 	})
 
 	let todoDescription: string = '';
@@ -105,58 +101,11 @@
 	$: currentTodos = todos.filter((item) => !item.isArchived);
 	$: archivedTodos = todos.filter((item) => item.isArchived);
 
-	const defaultTagColor = '#000000';
-	let newTag: Tag = { name: '', color: defaultTagColor };;
-	let openTagAlert = false;
-	let alertMessage: string | undefined;
+	let tagItems: { value: string; name: string }[] = []
 
-	async function createTag() {
-		if (!newTag.name) {
-			alertMessage = 'Tag name is required';
-			openTagAlert = true;
-			setTimeout(() => {
-				alertMessage = undefined;
-				openTagAlert = false;
-			}, 5000);
-			return;
-		}
-		const validationMessage = await validateTagRequest(newTag);
-		if (validationMessage && validationMessage !== 'success') {
-			alertMessage = validationMessage;
-			openTagAlert = true;
-			setTimeout(() => {
-				alertMessage = undefined;
-				openTagAlert = false;
-			}, 5000);
-			return
-		}
-		await createTagRequest(newTag);
-		newTag = { name: '', color: defaultTagColor };
-		tags = await getTagsRequest();
-		tagItems = tags.map(tag => ({ value: tag.name, name: tag.name }));
-	}
-
-	async function updateTag(tag: Tag) {
-		return
-	}
-
-	async function deleteTag(id: string | undefined) {
-		if (!id) {
-			return;
-		}
-		await deleteTagRequest(id);
-		tags = await getTagsRequest();
-		tagItems = tags.map(tag => ({ value: tag.name, name: tag.name }));
-		todos = await getToDosRequest();
-	}
-
-	function adjustTagColorStyle(colorHex: string | undefined): string {
-		const color = Color(colorHex || defaultTagColor);
-
-		const accent = color.saturate(0.1).lightness(45)
-		const backgorund = color.saturate(-0.2).lightness(90)
-
-		return `border: 2px solid ${accent.hex()}; background-color: ${backgorund.hex()}; color: ${accent.hex()};`;
+	function handleTagsUpdated(event: CustomEvent<Tag[]>) {
+		const tags = event.detail;
+		tagItems = tags.map(tag => ({ value: tag.name, name: tag.name }))
 	}
 
 </script>
@@ -288,64 +237,10 @@
 
 		<AccordionItem>
 			<span slot="header">Manage Tags</span>
-			<Table hoverable={true}>
-				<TableHead>
-					<TableHeadCell>Name</TableHeadCell>
-					<TableHeadCell class="w-60">Appearance</TableHeadCell>
-					<TableHeadCell>Actions</TableHeadCell>
-				</TableHead>
-				<TableBody tableBodyClass="divide-y">
-					{#each tags as tag}
-						<TableBodyRow>
-							<TableBodyCell>{tag.name}</TableBodyCell>
-							<TableHeadCell>
-								<Badge style={adjustTagColorStyle(tag.color)}>{tag.name}</Badge>
-							</TableHeadCell>
-							<TableBodyCell>
-								<ButtonGroup class="*:!ring-primary-700">
-									<Button on:click={() => updateTag(tag)}>
-										<EditSolid class="me-2 h-4 w-4" />
-										Edit
-									</Button>
-									<Button on:click={() => deleteTag(tag.id)}>
-										<CircleMinusSolid class="me-2 h-4 w-4" />
-										Delete
-									</Button>
-								</ButtonGroup>
-							</TableBodyCell>
-						</TableBodyRow>
-					{/each}
-					<TableBodyRow>
-						<TableBodyCell>
-							<Input
-								id="tag-name"
-								size="sm"
-								placeholder="Type tag name"
-								color={openTagAlert ? 'red' : undefined}
-								bind:value={newTag.name}
-							/>
-						</TableBodyCell>
-						<TableBodyCell>
-							<div class="flex items-center gap-2">
-								<Input type="color" size="sm" bind:value={newTag.color} />
-								<Tooltip>Select color</Tooltip>
-								<Badge style={adjustTagColorStyle(newTag.color)}>new tag</Badge>
-							</div>
-						</TableBodyCell>
-						<TableBodyCell>
-							<ButtonGroup class="*:!ring-primary-700">
-								<Button on:click={() => createTag()}>
-									<CirclePlusSolid class="me-2 h-4 w-4" />
-									Add
-								</Button>
-							</ButtonGroup>
-						</TableBodyCell>
-					</TableBodyRow>
-				</TableBody>
-			</Table>
-			{#if openTagAlert}
-				<Alert>{alertMessage}</Alert>
-			{/if}
+			<ManageTags
+			on:tagDeleted={async () => todos = await getToDosRequest()}
+			on:tagsUpdated={(event) => handleTagsUpdated(event)}
+			/>
 		</AccordionItem>
 
 		<AccordionItem>
