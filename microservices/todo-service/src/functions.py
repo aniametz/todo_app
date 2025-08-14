@@ -1,4 +1,11 @@
+from datetime import datetime, timezone
 from data_models.tag import Tag
+
+def convert_iso_to_datetime(iso_str):
+    # TODO fix the issue with the timezone conversion
+    if iso_str:
+        return datetime.fromisoformat(iso_str)
+    return None
 
 def create_tag_objects(data):
     tags = data.pop("tags", [])

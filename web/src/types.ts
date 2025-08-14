@@ -2,11 +2,13 @@ export interface ToDo {
 	id?: string;
 	description: string;
 	priority: Priority;
+	difficulty?: number;
 	tags: Tag[];
 	isDone: boolean;
 	isArchived: boolean;
 	createdAt?: string;
 	completedAt?: string;
+	dueDate?: Date | undefined;
 }
 
 export enum Priority {

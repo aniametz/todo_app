@@ -17,14 +17,14 @@
 		TableBodyRow,
 		TableHead,
 		TableHeadCell,
-
 		Tooltip
 	} from 'flowbite-svelte';
 	import {
 		ArchiveSolid,
 		ArrowUpRightFromSquareSolid,
 		CircleMinusSolid,
-		CirclePlusSolid
+		CirclePlusSolid,
+		EditSolid
 	} from 'flowbite-svelte-icons';
 	import Navbar from './navbar.svelte';
 
@@ -46,8 +46,21 @@
 
 	let todoDescription: string = '';
 	let todoPriority: Priority = Priority.NONE;
+	let todoDifficulty: number | undefined = undefined;
+	let todoDueDate: Date | undefined  = undefined;
+	let todoDueDateTime: string | undefined  = undefined;
 	let todoTags: string[] = [];
 	let openAlert = false;
+
+	async function resetToDoForm() {
+		todoDescription = '';
+		todoPriority = Priority.NONE;
+		todoDifficulty = undefined;
+		todoDueDate = undefined;
+		todoDueDateTime = undefined;
+		todoTags = [];
+		todos = await getToDosRequest()
+	}
 
 	async function createToDo() {
 		if (!todoDescription) {
@@ -57,18 +70,22 @@
 			}, 5000);
 			return;
 		}
+
+		if (todoDueDateTime && todoDueDate) {
+			todoDueDate = new Date(todoDueDate + ' ' + todoDueDateTime);
+		}
+
 		const newTodo = {
 			description: todoDescription,
 			priority: todoPriority,
+			difficulty: todoDifficulty,
+			dueDate: todoDueDate,
 			tags: todoTags.map(tag => ({ name: tag})), 
 			isDone: false,
 			isArchived: false
 		};
 		await createToDoRequest(newTodo);
-		todoDescription = '';
-		todoPriority = Priority.NONE;
-		todoTags = [];
-		todos = await getToDosRequest()
+		await resetToDoForm();
 	}
 
 	async function updateToDo(todo: ToDo) {
@@ -154,6 +171,8 @@
 					<TableHeadCell class="!p-4"></TableHeadCell>
 					<TableHeadCell>Description</TableHeadCell>
 					<TableHeadCell class="w-40">Priority</TableHeadCell>
+					<TableHeadCell class="w-40">Difficulty</TableHeadCell>
+					<TableHeadCell class="w-60">Due date</TableHeadCell>
 					<TableHeadCell class="w-80">Tags</TableHeadCell>
 					<TableHeadCell>Actions</TableHeadCell>
 				</TableHead>
@@ -169,17 +188,23 @@
 									{todo.priority.toUpperCase()}
 								</Badge>
 							</TableBodyCell>
+							<TableBodyCell>{todo.difficulty ?? '---'}</TableBodyCell>
+							<TableBodyCell>{todo.dueDate ?? '---'}</TableBodyCell>
 							<TableBodyCell>
 								{#if todo.tags && todo.tags.length > 0}
 									{#each todo.tags as tag}
 										<Badge style={adjustTagColorStyle(tag.color)} class="mr-1">{tag.name}</Badge>
 									{/each}
 								{:else}
-									<Badge style={adjustTagColorStyle(defaultTagColor)}>no tags</Badge>
+									---
 								{/if}
 							</TableBodyCell>
 							<TableBodyCell>
 								<ButtonGroup class="*:!ring-primary-700">
+									<Button>
+										<EditSolid class="me-2 h-4 w-4" />
+										Edit
+									</Button>
 									<Button on:click={() => updateToDo({...todo, isArchived: true})}>
 										<ArchiveSolid class="me-2 h-4 w-4" />
 										Archive
@@ -209,12 +234,36 @@
 							<Select 
 								id="todo-priority"
 								placeholder="Select priority"
-								bind:value={todoPriority} size="sm">
+								bind:value={todoPriority} 
+								size="sm">
 								{#each Object.values(Priority) as priorityValue}
 									<option value={priorityValue}>{priorityValue.toUpperCase()}</option>
 								{/each}
 							</Select>
 							<Tooltip>Select priority</Tooltip>
+						</TableBodyCell>
+						<TableBodyCell class="w-40">
+							<Input
+								type="number"
+								id="todo-difficulty"
+								size="sm"
+								min="1"
+								max="5"
+								bind:value={todoDifficulty}/>
+							<Tooltip>Select difficulty (1-5)</Tooltip>
+						</TableBodyCell>
+						<TableBodyCell class="w-60">
+							<Input
+								type="date"
+								id="todo-due-date"
+								size="sm"
+								bind:value={todoDueDate}/>
+							<Tooltip>Select due date</Tooltip>
+							<Input
+								type="time"
+								id="todo-due-time"
+								size="sm"
+								bind:value={todoDueDateTime}/>
 						</TableBodyCell>
 						<TableBodyCell class="w-80">
 							<!-- TODO: fix the issue with Multiselect hidden dropdown -->
@@ -254,11 +303,11 @@
 							<TableBodyCell>
 								<ButtonGroup class="*:!ring-primary-700">
 									<Button on:click={() => updateTag(tag)}>
-										<CircleMinusSolid class="me-2 h-4 w-4" />
+										<EditSolid class="me-2 h-4 w-4" />
 										Edit
 									</Button>
 									<Button on:click={() => deleteTag(tag.id)}>
-										<ArrowUpRightFromSquareSolid class="me-2 h-4 w-4" />
+										<CircleMinusSolid class="me-2 h-4 w-4" />
 										Delete
 									</Button>
 								</ButtonGroup>

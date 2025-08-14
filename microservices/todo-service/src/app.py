@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
-from functions import create_tag_objects
+from functions import convert_iso_to_datetime, create_tag_objects
 from Levenshtein import distance, hamming
 
 from data_models.todo import Todo
@@ -24,6 +24,7 @@ with app.app_context():
 @app.route('/create_todo', methods=["POST"])
 def create_todo():
     data = request.get_json().get("todoData")
+    data["dueDate"] = convert_iso_to_datetime(data["dueDate"])
     tag_objects = create_tag_objects(data)
     new_todo = Todo(**data)
     new_todo.tags = tag_objects
@@ -34,8 +35,9 @@ def create_todo():
 @app.route('/update_todo', methods=["POST"])
 def update_todo():
     data = request.get_json().get("todoData")
+    data["dueDate"] = convert_iso_to_datetime(data["dueDate"])
     data["completedAt"] = datetime.now(timezone.utc) if data["isDone"] else None
-    # createdAt should not be updated because its fromat from svelte is not compatible with the database
+    # createdAt should not be updated (besides its fromat from svelte is not compatible with the database)
     data.pop("createdAt", None)  
     tag_objects = create_tag_objects(data)
     Todo.query.filter_by(id=data["id"]).update(data)
