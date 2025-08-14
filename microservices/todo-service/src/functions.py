@@ -1,8 +1,5 @@
 from data_models.tag import Tag
 
-def hamming_distance(chain1, chain2):
-    return sum(c1 != c2 for c1, c2 in zip(chain1, chain2))
-
 def create_tag_objects(data):
     tags = data.pop("tags", [])
     tag_objects = []
