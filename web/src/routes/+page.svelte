@@ -84,6 +84,7 @@
 			isDone: false,
 			isArchived: false
 		};
+		console.log('Creating new todo:', newTodo);
 		await createToDoRequest(newTodo);
 		await resetToDoForm();
 	}

@@ -24,7 +24,7 @@ with app.app_context():
 @app.route('/create_todo', methods=["POST"])
 def create_todo():
     data = request.get_json().get("todoData")
-    data["dueDate"] = convert_iso_to_datetime(data["dueDate"])
+    data["dueDate"] = convert_iso_to_datetime(data["dueDate"] if "dueDate" in data else None)
     tag_objects = create_tag_objects(data)
     new_todo = Todo(**data)
     new_todo.tags = tag_objects
@@ -35,7 +35,7 @@ def create_todo():
 @app.route('/update_todo', methods=["POST"])
 def update_todo():
     data = request.get_json().get("todoData")
-    data["dueDate"] = convert_iso_to_datetime(data["dueDate"])
+    data["dueDate"] = convert_iso_to_datetime(data["dueDate"] if "dueDate" in data else None)
     data["completedAt"] = datetime.now(timezone.utc) if data["isDone"] else None
     # createdAt should not be updated (besides its fromat from svelte is not compatible with the database)
     data.pop("createdAt", None)  
@@ -51,6 +51,7 @@ def update_todo():
 def delete_todo():
     data = request.get_json().get("todoData")
     Todo.query.filter_by(id=data).delete()
+    TodoTagAssociation.query.filter_by(todo_id=data).delete()
     db.session.commit()
     return jsonify({'message': 'success'})
 
