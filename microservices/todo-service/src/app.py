@@ -64,7 +64,7 @@ def get_todos():
 @app.route('/validate_tag', methods=["POST"])
 def validate_tag():
     data = request.get_json().get("tagData")
-    tags = Tag.query.all()
+    tags = Tag.query.filter(Tag.id != data["id"]).all() if "id" in data else Tag.query.all()
     for tag in tags:
         lower_tag_name = tag.name.strip().lower()
         lower_data_name = data["name"].strip().lower()
@@ -84,6 +84,13 @@ def create_tag():
     data["name"] = data["name"].strip()
     new_tag = Tag(**data)
     db.session.add(new_tag)
+    db.session.commit()
+    return jsonify({'message': 'success'})
+
+@app.route('/update_tag', methods=["POST"])
+def update_tag():
+    data = request.get_json().get("tagData")
+    Tag.query.filter_by(id=data["id"]).update(data)
     db.session.commit()
     return jsonify({'message': 'success'})
 

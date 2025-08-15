@@ -29,7 +29,7 @@
 	import Navbar from './navbar.svelte';
 
 	import { onMount } from 'svelte';
-	import ManageTags from '../components/manage_tags.svelte';
+	import TagsTable from '../components/tags_table.svelte';
 	import { createToDoRequest, deleteToDoRequest, getToDosRequest, updateToDoRequest } from '../data/todo_crud';
 	import { adjustTagColorStyle } from '../functions';
 	import { Priority, PriorityColor, type Tag, type ToDo } from "../types";
@@ -80,7 +80,6 @@
 			isDone: false,
 			isArchived: false
 		};
-		console.log('Creating new todo:', newTodo);
 		await createToDoRequest(newTodo);
 		await resetToDoForm();
 	}
@@ -103,7 +102,8 @@
 
 	let tagItems: { value: string; name: string }[] = []
 
-	function handleTagsUpdated(event: CustomEvent<Tag[]>) {
+	async function handleTagsUpdated(event: CustomEvent<Tag[]>) {
+		todos = await getToDosRequest()
 		const tags = event.detail;
 		tagItems = tags.map(tag => ({ value: tag.name, name: tag.name }))
 	}
@@ -237,9 +237,9 @@
 
 		<AccordionItem>
 			<span slot="header">Manage Tags</span>
-			<ManageTags
+			<TagsTable
 			on:tagDeleted={async () => todos = await getToDosRequest()}
-			on:tagsUpdated={(event) => handleTagsUpdated(event)}
+			on:tagsUpdated={async (event) => await handleTagsUpdated(event)}
 			/>
 		</AccordionItem>
 
