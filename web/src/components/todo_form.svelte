@@ -64,7 +64,7 @@
             console.log(newTodo.dueDate);
             newTodo.tags = $tags.filter(tag => todoTags.includes(tag.name))
             await createToDoRequest(newTodo);
-            // adding new todo to the store results with missing todo id from database
+            // adding new todo to the store results in missing todo id from database
             await loadTodos();
             await resetToDoForm();
         }

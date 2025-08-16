@@ -48,7 +48,7 @@
         const isTagValid = await validateTag();
 		if (isTagValid) {
             await createTagRequest(newTag);
-            // adding new tag to the store results with missing tag id from database
+            // adding new tag to the store results in missing tag id from database
             await loadTags();
 		    resetTagForm();
         }

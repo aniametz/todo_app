@@ -48,15 +48,23 @@ def update_todo():
     data = request.get_json().get("todoData")
     # TODO clean up date time conversion mess
     data["dueDate"] = convert_date_string_to_datetime(data)
-    # TODO: for now when todo is updated this field is set to current time, but it should be set only when todo is done
-    data["completedAt"] = datetime.now(timezone.utc) if data["isDone"] else None
-    # createdAt should not be updated (besides its fromat from svelte is not compatible with the database)
-    data.pop("createdAt", None)  
+    # createdAt and completedAt should not be updated
+    data.pop("createdAt", None)
+    data.pop("completedAt", None)
     tag_objects = create_tag_objects(data)
     Todo.query.filter_by(id=data["id"]).update(data)
     # tags should not be updated in bulk
     todo = Todo.query.filter_by(id=data["id"]).first()
     todo.tags[:] = tag_objects
+    db.session.commit()
+    return jsonify({'message': 'success'})
+
+@app.route('/update_todo_is_done', methods=["POST"])
+def update_todo_is_done():
+    data = request.get_json().get("todoData")
+    todo = Todo.query.filter_by(id=data["id"]).first()
+    todo.completedAt = datetime.now(timezone.utc) if data["isDone"] else None
+    todo.isDone = data["isDone"]
     db.session.commit()
     return jsonify({'message': 'success'})
 

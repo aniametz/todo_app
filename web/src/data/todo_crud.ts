@@ -26,6 +26,14 @@ export async function updateToDoRequest(todoData: ToDo): Promise<string> {
 		.then((response) => response.data.message);
 }
 
+export async function updateToDoIsDoneRequest(todoData: ToDo): Promise<string> {
+	return await axios
+		.post(backend_port + '/update_todo_is_done', {
+			todoData: todoData
+		})
+		.then((response) => response.data.message);
+}
+
 export async function deleteToDoRequest(todoData: string): Promise<string> {
 	return await axios
 		.post(backend_port + '/delete_todo', {

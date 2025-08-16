@@ -12,7 +12,7 @@
 
     let editingId: string | undefined = undefined;
 
-        function startEdit(id: string) {
+    function startEdit(id: string) {
         editingId = id;
     }
 
@@ -43,7 +43,7 @@
             {:else}
             <TableBodyRow>
                 <TableBodyCell class="!p-4">
-                    <Checkbox checked={todo.isDone} on:click={() => dispatch("updateToDo", {...todo, isDone: !todo.isDone})} />
+                    <Checkbox checked={todo.isDone} on:click={() => dispatch("updateToDoIsDone", {...todo, isDone: !todo.isDone})} />
                 </TableBodyCell>
                 <TableBodyCell>{todo.description}</TableBodyCell>
                 <TableBodyCell class="w-40">
