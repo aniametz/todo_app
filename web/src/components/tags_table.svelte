@@ -1,31 +1,19 @@
 <script lang="ts">
 	import { Badge, Button, ButtonGroup, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from "flowbite-svelte";
 	import { CircleMinusSolid, EditSolid } from "flowbite-svelte-icons";
-	import { createEventDispatcher, onMount } from "svelte";
-	import { defaultTagColor } from "../constants";
-	import { deleteTagRequest, getTagsRequest } from "../data/tag_crud";
+	import { initialTag } from "../constants";
+	import { deleteTagRequest } from "../data/tag_crud";
 	import { adjustTagColorStyle } from "../functions";
-	import type { Tag } from "../types";
+	import { loadTodos, tags } from "../store";
 	import TagForm from "./tag_form.svelte";
-
-    const dispatch = createEventDispatcher();
-
-    let tags: Tag[] = [];
-
-    async function handleTagsUpdate() {
-        tags = await getTagsRequest();
-        dispatch('tagsUpdated', tags);
-    }
-
-    onMount(async () => await handleTagsUpdate())
 
     async function deleteTag(id: string | undefined) {
 		if (!id) {
 			return;
 		}
 		await deleteTagRequest(id);
-        await handleTagsUpdate()
-        dispatch('tagDeleted');
+        $tags = $tags .filter(item => item.id !== id);
+        await loadTodos();
 	}
 
     let editingId: string | undefined = undefined;
@@ -48,11 +36,10 @@
         <TableHeadCell>Actions</TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
-        {#each tags as tag}
+        {#each $tags as tag}
             {#if editingId === tag.id}
                 <TagForm 
                 tag={tag} 
-                on:tagsNeedUpdate={async () => await handleTagsUpdate()} 
                 onCancel={cancelEdit}
                 submitLabel="Update"/>
             {:else}
@@ -77,8 +64,7 @@
             {/if}
         {/each}
         <TagForm 
-        tag={{ name: '', color: defaultTagColor }}
-        on:tagsNeedUpdate={async () => await handleTagsUpdate()} 
+        tag={initialTag}
         submitLabel="Add"/>
     </TableBody>
 </Table>

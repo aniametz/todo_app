@@ -1,11 +1,23 @@
 from datetime import datetime, timezone
 from data_models.tag import Tag
 
-def convert_iso_to_datetime(iso_str):
+def convert_date_string_to_datetime(data: any) -> datetime:
     # TODO fix the issue with the timezone conversion
-    if iso_str:
-        return datetime.fromisoformat(iso_str)
-    return None
+    date_string = data["dueDate"] if "dueDate" in data else None
+    if not date_string:
+        return None
+    try:
+        return datetime.fromisoformat(date_string)
+    except ValueError:
+        return datetime.strptime(date_string, '%a, %d %b %Y %H:%M:%S %Z')
+
+def is_isoformat_date(date_string: str) -> bool:
+    try:
+        # Try parsing with datetime.fromisoformat (handles date and datetime)
+        datetime.fromisoformat(date_string)
+        return True
+    except ValueError:
+        return False
 
 def create_tag_objects(data):
     tags = data.pop("tags", [])

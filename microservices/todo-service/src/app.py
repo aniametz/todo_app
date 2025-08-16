@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
-from functions import convert_iso_to_datetime, create_tag_objects
+from functions import convert_date_string_to_datetime, create_tag_objects
 from Levenshtein import distance, hamming
 
 from data_models.todo import Todo
@@ -21,10 +21,21 @@ migrate = Migrate(app, db)
 with app.app_context():
     db.create_all()
 
+@app.route('/validate_todo', methods=["POST"])
+def validate_todo():
+    data = request.get_json().get("todoData")
+    todos = Todo.query.filter(Todo.id != data["id"]).all() if "id" in data else Todo.query.all()
+    for todo in todos:
+        lower_todo_description = todo.description.strip().lower()
+        lower_data_description= data["description"].strip().lower()
+        if lower_todo_description == lower_data_description:
+            return jsonify({'message': f'Todo "{todo.description}" already exists'})
+    return jsonify({'message': 'success'})
+
 @app.route('/create_todo', methods=["POST"])
 def create_todo():
     data = request.get_json().get("todoData")
-    data["dueDate"] = convert_iso_to_datetime(data["dueDate"] if "dueDate" in data else None)
+    data["dueDate"] = convert_date_string_to_datetime(data)
     tag_objects = create_tag_objects(data)
     new_todo = Todo(**data)
     new_todo.tags = tag_objects
@@ -36,7 +47,8 @@ def create_todo():
 def update_todo():
     data = request.get_json().get("todoData")
     # TODO clean up date time conversion mess
-    data["dueDate"] = datetime.strptime(data["dueDate"], '%a, %d %b %Y %H:%M:%S %Z') if ("dueDate" in data and data["dueDate"]) else None
+    data["dueDate"] = convert_date_string_to_datetime(data)
+    # TODO: for now when todo is updated this field is set to current time, but it should be set only when todo is done
     data["completedAt"] = datetime.now(timezone.utc) if data["isDone"] else None
     # createdAt should not be updated (besides its fromat from svelte is not compatible with the database)
     data.pop("createdAt", None)  

@@ -1,44 +1,43 @@
 <script lang="ts">
 	import { Alert, Badge, Button, ButtonGroup, Input, TableBodyCell, TableBodyRow, Tooltip } from "flowbite-svelte";
 	import { CirclePlusSolid, CloseCircleSolid, PenSolid } from "flowbite-svelte-icons";
-	import { createEventDispatcher } from "svelte";
 	import { defaultTagColor } from "../constants";
 	import { createTagRequest, updateTagRequest, validateTagRequest } from "../data/tag_crud";
 	import { adjustTagColorStyle } from "../functions";
+	import { loadTags, loadTodos, tags } from "../store";
 	import type { Tag } from "../types";
-
-    const dispatch = createEventDispatcher();
 
     export let tag: Tag = { name: '', color: defaultTagColor };
     export let onCancel: () => void = () => {};
     export let submitLabel: string = "Add";
 
     let newTag = structuredClone(tag);
-	let openTagAlert = false;
+
+    const numberOfColumns = Object.keys(tag).length + 1;
+	let openAlert = false;
 	let alertMessage: string | undefined;
 
     function resetTagForm() {
-        newTag = { name: '', color: defaultTagColor }; 
-        dispatch('tagsNeedUpdate');
+        newTag = { name: '', color: defaultTagColor };
     }   
 
-    async function validateTag(tag: Tag): Promise<boolean> {
-        if (!tag.name) {
+    async function validateTag(): Promise<boolean> {
+        if (!newTag.name) {
 			alertMessage = 'Tag name is required';
-			openTagAlert = true;
+			openAlert = true;
 			setTimeout(() => {
 				alertMessage = undefined;
-				openTagAlert = false;
+				openAlert = false;
 			}, 5000);
 			return false;
 		}
-		const validationMessage = await validateTagRequest(tag);
+		const validationMessage = await validateTagRequest(newTag);
 		if (validationMessage && validationMessage !== 'success') {
 			alertMessage = validationMessage;
-			openTagAlert = true;
+			openAlert = true;
 			setTimeout(() => {
 				alertMessage = undefined;
-				openTagAlert = false;
+				openAlert = false;
 			}, 5000);
 			return false;
 		}
@@ -46,17 +45,24 @@
     }
 
 	async function createTag() {
-        const isTagValid = await validateTag(newTag);
+        const isTagValid = await validateTag();
 		if (isTagValid) {
             await createTagRequest(newTag);
-		    resetTagForm()
+            // adding new tag to the store results with missing tag id from database
+            await loadTags();
+		    resetTagForm();
         }
 	}
 
     async function updateTag() {
-        const isTagValid = await validateTag(newTag);
+        const isTagValid = await validateTag();
         if (isTagValid) {
             await updateTagRequest(newTag);
+            $tags = $tags.map(item => {
+                if (item.id === newTag.id) return newTag;
+                return item;
+            });
+            await loadTodos();
             resetTagForm();
             onCancel();
         }
@@ -70,7 +76,7 @@
             id="tag-name"
             size="sm"
             placeholder="Type tag name"
-            color={openTagAlert ? 'red' : undefined}
+            color={openAlert ? 'red' : undefined}
             bind:value={newTag.name}
         />
     </TableBodyCell>
@@ -101,6 +107,10 @@
         </ButtonGroup>
     </TableBodyCell>
 </TableBodyRow>
-{#if openTagAlert}
-    <Alert>{alertMessage}</Alert>
+{#if openAlert}
+<TableBodyRow>
+    <TableBodyCell colspan={numberOfColumns}>
+        <Alert>{alertMessage}</Alert>
+    </TableBodyCell>
+</TableBodyRow>
 {/if}

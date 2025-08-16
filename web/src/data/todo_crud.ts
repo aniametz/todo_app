@@ -2,6 +2,14 @@ import axios from 'axios';
 import { backend_port } from '../constants';
 import type { ToDo } from '../types';
 
+export async function validateTodoRequest(tagData: ToDo): Promise<string> {
+	return await axios
+		.post(backend_port + '/validate_todo', {
+			todoData: tagData
+		})
+		.then((response) => response.data.message);
+}
+
 export async function createToDoRequest(todoData: ToDo): Promise<string> {
 	return await axios
 		.post(backend_port + '/create_todo', {
