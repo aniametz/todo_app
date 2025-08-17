@@ -22,25 +22,19 @@
     }   
 
     async function validateTag(): Promise<boolean> {
-        if (!newTag.name) {
-			alertMessage = 'Tag name is required';
-			openAlert = true;
-			setTimeout(() => {
-				alertMessage = undefined;
-				openAlert = false;
-			}, 5000);
-			return false;
-		}
+        if (!newTag.name) alertMessage = 'Name is required';
 		const validationMessage = await validateTagRequest(newTag);
-		if (validationMessage && validationMessage !== 'success') {
-			alertMessage = validationMessage;
-			openAlert = true;
+		if (validationMessage && validationMessage !== 'success') alertMessage = validationMessage;
+
+        if (alertMessage) {
+            openAlert = true;
 			setTimeout(() => {
 				alertMessage = undefined;
 				openAlert = false;
 			}, 5000);
 			return false;
-		}
+        }
+
         return true;
     }
 

@@ -17,11 +17,14 @@
     let newTodo = structuredClone(todo);
     // TODO clean up date time conversion mess on web also
     const date = newTodo.dueDate ? new Date(newTodo.dueDate) : new Date();
-    let todoDueDate: string | undefined = 
+    let todoDueDateEdit: string | undefined = 
     `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCDate().toString().padStart(2, '0')}`;
-	let todoDueDateTime: string | undefined  = 
+	let todoDueDateTimeEdit: string | undefined  = 
     `${date.getUTCHours().toString().padStart(2, '0')}:${date.getUTCMinutes().toString().padStart(2, '0')}`;
     let todoTags: string[] = todo.tags ? todo.tags.map(tag => tag.name) : [];
+
+    let todoDueDate: string | undefined = submitLabel === "Add" ? undefined : todoDueDateEdit;
+    let todoDueDateTime: string | undefined = submitLabel === "Add" ? undefined : todoDueDateTimeEdit;
 
     const numberOfColumns = Object.keys(todo).length + 1;
     let alertMessage: string | undefined  = undefined;
@@ -29,44 +32,40 @@
 
 	async function resetToDoForm() {
         newTodo = initialTodo;
+        todoDueDateEdit = undefined;
+        todoDueDateTimeEdit = undefined;
         todoDueDate = undefined;
 		todoDueDateTime = undefined;
         todoTags = [];
 	}
 
     async function validateTodo(): Promise<boolean> {
-        if (!newTodo.description) {
-			alertMessage = 'To Do description is required';
-			openAlert = true;
-			setTimeout(() => {
-				alertMessage = undefined;
-				openAlert = false;
-			}, 5000);
-			return false;
-		}
+        if (!newTodo.description) alertMessage = 'Description is required';
 		const validationMessage = await validateTodoRequest(newTodo);
-		if (validationMessage && validationMessage !== 'success') {
-			alertMessage = validationMessage;
-			openAlert = true;
+		if (validationMessage && validationMessage !== 'success') alertMessage = validationMessage;
+        if (!todoDueDate && todoDueDateTime) alertMessage = 'Due date is required when time is set';
+
+        if (alertMessage) {
+            openAlert = true;
 			setTimeout(() => {
 				alertMessage = undefined;
 				openAlert = false;
 			}, 5000);
 			return false;
-		}
+        }
         return true;
     }
 
 	async function createToDo() {
         const isTodoValid = await validateTodo();
 		if (isTodoValid) {
-            if (todoDueDateTime && todoDueDate) newTodo.dueDate = new Date(todoDueDate + ' ' + todoDueDateTime);
-            console.log(newTodo.dueDate);
+            todoDueDateTime = todoDueDateTime ? todoDueDateTime : "00:00";
+            if (todoDueDateTime) newTodo.dueDate = new Date(todoDueDate + ' ' + todoDueDateTime);
             newTodo.tags = $tags.filter(tag => todoTags.includes(tag.name))
             await createToDoRequest(newTodo);
             // adding new todo to the store results in missing todo id from database
             await loadTodos();
-            await resetToDoForm();
+            resetToDoForm();
         }
 	}
 
@@ -81,7 +80,7 @@
             id="todo-description"
             placeholder="Type todo description"
             size="sm"
-            color={openAlert ? 'red' : undefined}
+            color={openAlert && alertMessage?.includes("Description") ? 'red' : undefined}
             bind:value={newTodo.description}
         />
     </TableBodyCell>
@@ -112,6 +111,7 @@
             type="date"
             id="todo-due-date"
             size="sm"
+            color={openAlert && alertMessage?.includes("Due date") ? 'red' : undefined}
             bind:value={todoDueDate}/>
         <Tooltip>Select due date</Tooltip>
         <Input

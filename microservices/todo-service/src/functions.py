@@ -7,17 +7,9 @@ def convert_date_string_to_datetime(data: any) -> datetime:
     if not date_string:
         return None
     try:
-        return datetime.fromisoformat(date_string)
+        return datetime.fromisoformat(date_string).astimezone(timezone.utc)
     except ValueError:
         return datetime.strptime(date_string, '%a, %d %b %Y %H:%M:%S %Z')
-
-def is_isoformat_date(date_string: str) -> bool:
-    try:
-        # Try parsing with datetime.fromisoformat (handles date and datetime)
-        datetime.fromisoformat(date_string)
-        return True
-    except ValueError:
-        return False
 
 def create_tag_objects(data):
     tags = data.pop("tags", [])
