@@ -9,7 +9,7 @@
 <div>
 
 <Table hoverable={true}>
-    <TableBody tableBodyClass="divide-y">
+    <TableBody class="divide-y">
         {#each $archivedTodos as todo}
             <TableBodyRow>
                 <TableBodyCell class="!p-4"
@@ -19,11 +19,11 @@
                 <TableBodyCell></TableBodyCell>
                 <TableBodyCell>
                     <ButtonGroup class="*:!ring-primary-700">
-                        <Button on:click={async () => {$todos = await updateToDo({...todo, isArchived: false}, $todos)}}>
+                        <Button onclick={async () => {$todos = await updateToDo({...todo, isArchived: false}, $todos)}}>
                             <ArrowUpRightFromSquareSolid class="me-2 h-4 w-4" />
                             Restore
                         </Button>
-                        <Button on:click={async () => $todos = await deleteToDo(todo.id, $todos)}>
+                        <Button onclick={async () => $todos = await deleteToDo(todo.id, $todos)}>
                             <CircleMinusSolid class="me-2 h-4 w-4" />
                             Delete
                         </Button>

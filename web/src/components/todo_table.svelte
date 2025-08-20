@@ -30,7 +30,7 @@
         <TableHeadCell class="w-80">Tags</TableHeadCell>
         <TableHeadCell>Actions</TableHeadCell>
     </TableHead>
-    <TableBody tableBodyClass="divide-y">
+    <TableBody class="divide-y">
         {#each $currentTodos as todo}
             {#if editingId === todo.id}
                 <TodoForm 
@@ -40,8 +40,8 @@
             {:else}
             <TableBodyRow>
                 <TableBodyCell class="!p-4">
-                    <Checkbox checked={todo.isDone} on:click={
-                        async () => {$todos = await updateToDoIsDone({...todo, isDone: !todo.isDone}, $todos)}} />
+                    <Checkbox checked={todo.isDone} 
+                    onclick={async () => {$todos = await updateToDoIsDone({...todo, isDone: !todo.isDone}, $todos)}} />
                 </TableBodyCell>
                 <TableBodyCell>{todo.description}</TableBodyCell>
                 <TableBodyCell class="w-40">
@@ -62,15 +62,15 @@
                 </TableBodyCell>
                 <TableBodyCell>
                     <ButtonGroup class="*:!ring-primary-700">
-                        <Button on:click={() => startEdit(todo.id ?? "")}>
+                        <Button onclick={() => startEdit(todo.id ?? "")}>
                             <EditSolid class="me-2 h-4 w-4" />
                             Edit
                         </Button>
-                        <Button on:click={async () => {$todos = await updateToDo({...todo, isArchived: true}, $todos)}}>
+                        <Button onclick={async () => {$todos = await updateToDo({...todo, isArchived: true}, $todos)}}>
                             <ArchiveSolid class="me-2 h-4 w-4" />
                             Archive
                         </Button>
-                        <Button on:click={async () => {$todos = await deleteToDo(todo.id, $todos)}}>
+                        <Button onclick={async () => {$todos = await deleteToDo(todo.id, $todos)}}>
                             <CircleMinusSolid class="me-2 h-4 w-4" />
                             Delete
                         </Button>

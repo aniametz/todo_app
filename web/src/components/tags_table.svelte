@@ -35,7 +35,7 @@
         <TableHeadCell class="w-60">Appearance</TableHeadCell>
         <TableHeadCell>Actions</TableHeadCell>
     </TableHead>
-    <TableBody tableBodyClass="divide-y">
+    <TableBody class="divide-y">
         {#each $tags as tag}
             {#if editingId === tag.id}
                 <TagForm 
@@ -50,11 +50,11 @@
                 </TableHeadCell>
                 <TableBodyCell>
                     <ButtonGroup class="*:!ring-primary-700">
-                        <Button on:click={() => startEdit(tag.id ?? "")}>
+                        <Button onclick={() => startEdit(tag.id ?? "")}>
                             <EditSolid  class="me-2 h-4 w-4" />
                             Edit
                         </Button>
-                        <Button on:click={() => deleteTag(tag.id)}>
+                        <Button onclick={() => deleteTag(tag.id)}>
                             <CircleMinusSolid class="me-2 h-4 w-4" />
                             Delete
                         </Button>

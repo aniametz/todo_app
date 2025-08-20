@@ -123,15 +123,13 @@
     </TableBodyCell>
     <TableBodyCell>
         <ButtonGroup class="*:!ring-primary-700">
-        </ButtonGroup>
-                <ButtonGroup class="*:!ring-primary-700">
             {#if submitLabel === "Add"}
-                <Button on:click={() => createToDo()}>
+                <Button onclick={() => createToDo()}>
                     <CirclePlusSolid class="me-2 h-4 w-4" />
                     Add
                 </Button>
             {:else}
-                <Button on:click={async () => {$todos = await updateToDo({
+                <Button onclick={async () => {$todos = await updateToDo({
                     ...newTodo, 
                     tags: $tags.filter(tag => todoTags.includes(tag.name)), 
                     dueDate:  (todoDueDateTime && todoDueDate) ? new Date(todoDueDate + ' ' + todoDueDateTime) : undefined,
@@ -140,7 +138,7 @@
                     <PenSolid class="me-2 h-4 w-4" />
                     Update
                 </Button>
-                <Button on:click={() => onCancel()}>
+                <Button onclick={() => onCancel()}>
                     <CloseCircleSolid class="me-2 h-4 w-4" />
                     Cancel
                 </Button>

@@ -21,17 +21,17 @@
 <div class="text-center">
 	<Accordion>
 		<AccordionItem open>
-			<span slot="header">Current To Dos</span>
+			{#snippet header()}Current To Dos{/snippet}
 			<TodoTable/>
 		</AccordionItem>
 
 		<AccordionItem>
-			<span slot="header">Manage Tags</span>
+			{#snippet header()}Manage Tags{/snippet}
 			<TagsTable/>
 		</AccordionItem>
 
 		<AccordionItem>
-			<span slot="header">Archived To Dos</span>
+			{#snippet header()}Archived To Dos{/snippet}
 			<TodoArchivedTable />
 		</AccordionItem>
 	</Accordion>

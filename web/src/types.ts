@@ -19,7 +19,6 @@ export enum Priority {
 }
 
 export type FlowbiteBadgeColor =
-	| 'none'
 	| 'red'
 	| 'yellow'
 	| 'green'
@@ -27,12 +26,23 @@ export type FlowbiteBadgeColor =
 	| 'purple'
 	| 'pink'
 	| 'blue'
-	| 'dark'
 	| 'primary'
+	| 'secondary'
+	| 'gray'
+	| 'orange'
+	| 'amber'
+	| 'lime'
+	| 'emerald'
+	| 'teal'
+	| 'cyan'
+	| 'sky'
+	| 'violet'
+	| 'fuchsia'
+	| 'rose'
 	| undefined;
 
 export const PriorityColor: Record<string, FlowbiteBadgeColor> = {
-	[Priority.NONE]: 'none',
+	[Priority.NONE]: undefined,
 	[Priority.LOW]: 'green',
 	[Priority.MEDIUM]: 'yellow',
 	[Priority.HIGH]: 'red'

@@ -84,16 +84,16 @@
     <TableBodyCell>
         <ButtonGroup class="*:!ring-primary-700">
             {#if submitLabel === "Add"}
-                <Button on:click={() => createTag()}>
+                <Button onclick={() => createTag()}>
                     <CirclePlusSolid class="me-2 h-4 w-4" />
                     Add
                 </Button>
             {:else}
-                <Button on:click={() => updateTag()}>
+                <Button onclick={() => updateTag()}>
                     <PenSolid class="me-2 h-4 w-4" />
                     Update
                 </Button>
-                <Button on:click={() => onCancel()}>
+                <Button onclick={() => onCancel()}>
                     <CloseCircleSolid class="me-2 h-4 w-4" />
                     Cancel
                 </Button>
