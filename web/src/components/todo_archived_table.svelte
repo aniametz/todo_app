@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { Button, ButtonGroup, Checkbox, Table, TableBody, TableBodyCell, TableBodyRow } from "flowbite-svelte";
 	import { ArrowUpRightFromSquareSolid, CircleMinusSolid } from "flowbite-svelte-icons";
-	import { createEventDispatcher } from "svelte";
-	import { archivedTodos } from "../store";
+	import { deleteToDo, updateToDo } from "../data/todo_crud";
+	import { archivedTodos, todos } from "../store";
 
-    const dispatch = createEventDispatcher();
-
-    </script>
+</script>
 
 <div>
 
@@ -21,11 +19,11 @@
                 <TableBodyCell></TableBodyCell>
                 <TableBodyCell>
                     <ButtonGroup class="*:!ring-primary-700">
-                        <Button on:click={() => {dispatch("todoRestored", {...todo, isArchived: false})}}>
+                        <Button on:click={async () => {$todos = await updateToDo({...todo, isArchived: false}, $todos)}}>
                             <ArrowUpRightFromSquareSolid class="me-2 h-4 w-4" />
                             Restore
                         </Button>
-                        <Button on:click={() => dispatch("todoDeleted", todo.id)}>
+                        <Button on:click={async () => $todos = await deleteToDo(todo.id, $todos)}>
                             <CircleMinusSolid class="me-2 h-4 w-4" />
                             Delete
                         </Button>

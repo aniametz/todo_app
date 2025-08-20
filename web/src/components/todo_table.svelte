@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { Badge, Button, ButtonGroup, Checkbox, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from "flowbite-svelte";
 	import { ArchiveSolid, CircleMinusSolid, EditSolid } from "flowbite-svelte-icons";
-	import { createEventDispatcher } from "svelte";
 	import { initialTodo } from "../constants";
+	import { deleteToDo, updateToDo, updateToDoIsDone } from "../data/todo_crud";
 	import { adjustTagColorStyle } from "../functions";
-	import { currentTodos } from "../store";
+	import { currentTodos, todos } from "../store";
 	import { PriorityColor } from "../types";
 	import TodoForm from "./todo_form.svelte";
-
-    const dispatch = createEventDispatcher();
 
     let editingId: string | undefined = undefined;
 
@@ -38,12 +36,12 @@
                 <TodoForm 
                 todo={todo} 
                 onCancel={cancelEdit}
-                submitLabel="Update"
-                on:todoUpdated={(event) => dispatch("updateToDo", event.detail)}/>
+                submitLabel="Update"/>
             {:else}
             <TableBodyRow>
                 <TableBodyCell class="!p-4">
-                    <Checkbox checked={todo.isDone} on:click={() => dispatch("updateToDoIsDone", {...todo, isDone: !todo.isDone})} />
+                    <Checkbox checked={todo.isDone} on:click={
+                        async () => {$todos = await updateToDoIsDone({...todo, isDone: !todo.isDone}, $todos)}} />
                 </TableBodyCell>
                 <TableBodyCell>{todo.description}</TableBodyCell>
                 <TableBodyCell class="w-40">
@@ -68,11 +66,11 @@
                             <EditSolid class="me-2 h-4 w-4" />
                             Edit
                         </Button>
-                        <Button on:click={() => dispatch("updateToDo", {...todo, isArchived: true})}>
+                        <Button on:click={async () => {$todos = await updateToDo({...todo, isArchived: true}, $todos)}}>
                             <ArchiveSolid class="me-2 h-4 w-4" />
                             Archive
                         </Button>
-                        <Button on:click={() => dispatch("deleteToDo", todo.id)}>
+                        <Button on:click={async () => {$todos = await deleteToDo(todo.id, $todos)}}>
                             <CircleMinusSolid class="me-2 h-4 w-4" />
                             Delete
                         </Button>

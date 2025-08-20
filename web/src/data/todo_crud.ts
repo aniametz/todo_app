@@ -45,3 +45,27 @@ export async function deleteToDoRequest(todoData: string): Promise<string> {
 export async function getToDosRequest(): Promise<ToDo[]> {
 	return await axios.get(backend_port + '/get_todos').then((response) => response.data.todos);
 }
+
+export async function updateToDo(todo: ToDo, todoStore: ToDo[]): Promise<ToDo[]> {
+	await updateToDoRequest(todo);
+	return todoStore.map((item) => {
+		if (item.id === todo.id) return todo;
+		return item;
+	});
+}
+
+export async function updateToDoIsDone(todo: ToDo, todoStore: ToDo[]): Promise<ToDo[]> {
+	await updateToDoIsDoneRequest(todo);
+	return todoStore.map((item) => {
+		if (item.id === todo.id) return todo;
+		return item;
+	});
+}
+
+export async function deleteToDo(id: string | undefined, todoStore: ToDo[]): Promise<ToDo[]> {
+	if (!id) {
+		return todoStore;
+	}
+	await deleteToDoRequest(id);
+	return todoStore.filter((item) => item.id !== id);
+}

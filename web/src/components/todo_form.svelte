@@ -1,13 +1,10 @@
 <script lang="ts">
 	import { Alert, Button, ButtonGroup, Checkbox, Input, MultiSelect, Select, TableBodyCell, TableBodyRow, Tooltip } from "flowbite-svelte";
 	import { CirclePlusSolid, CloseCircleSolid, PenSolid } from "flowbite-svelte-icons";
-	import { createEventDispatcher } from "svelte";
 	import { initialTodo } from "../constants";
-	import { createToDoRequest, validateTodoRequest } from "../data/todo_crud";
-	import { loadTodos, tagItems, tags } from "../store";
+	import { createToDoRequest, updateToDo, validateTodoRequest } from "../data/todo_crud";
+	import { loadTodos, tagItems, tags, todos } from "../store";
 	import { Priority, type ToDo } from "../types";
-
-    const dispatch = createEventDispatcher();
 
     export let todo: ToDo = initialTodo;
 
@@ -134,11 +131,11 @@
                     Add
                 </Button>
             {:else}
-                <Button on:click={() => {dispatch("todoUpdated", {
+                <Button on:click={async () => {$todos = await updateToDo({
                     ...newTodo, 
                     tags: $tags.filter(tag => todoTags.includes(tag.name)), 
                     dueDate:  (todoDueDateTime && todoDueDate) ? new Date(todoDueDate + ' ' + todoDueDateTime) : undefined,
-                    });
+                    }, $todos);
                     onCancel();}}>
                     <PenSolid class="me-2 h-4 w-4" />
                     Update
