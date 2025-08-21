@@ -20,12 +20,12 @@
 
 </script>
 
-<Table hoverable={true}>
+<Table hoverable={true} class="w-full">
     <TableHead>
-        <TableHeadCell class="!p-4"></TableHeadCell>
+        <TableHeadCell class="w-5"></TableHeadCell>
         <TableHeadCell>Description</TableHeadCell>
-        <TableHeadCell class="w-40">Priority</TableHeadCell>
-        <TableHeadCell class="w-40">Difficulty</TableHeadCell>
+        <TableHeadCell class="w-20">Priority</TableHeadCell>
+        <TableHeadCell class="w-20">Difficulty (1-5)</TableHeadCell>
         <TableHeadCell class="w-60">Due date</TableHeadCell>
         <TableHeadCell class="w-80">Tags</TableHeadCell>
         <TableHeadCell>Actions</TableHeadCell>

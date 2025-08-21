@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Alert, Badge, Button, ButtonGroup, Input, TableBodyCell, TableBodyRow, Tooltip } from "flowbite-svelte";
+	import { Alert, Badge, Button, ButtonGroup, Input, TableBodyCell, TableBodyRow } from "flowbite-svelte";
 	import { CirclePlusSolid, CloseCircleSolid, PenSolid } from "flowbite-svelte-icons";
 	import { defaultTagColor } from "../constants";
 	import { createTagRequest, updateTagRequest, validateTagRequest } from "../data/tag_crud";
@@ -77,7 +77,6 @@
     <TableBodyCell>
         <div class="flex items-center gap-2">
             <Input type="color" size="sm" bind:value={newTag.color} />
-            <Tooltip>Select color</Tooltip>
             <Badge style={adjustTagColorStyle(newTag.color)}>{newTag.name != "" ? newTag.name : "new tag"}</Badge>
         </div>
     </TableBodyCell>

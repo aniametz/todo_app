@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Alert, Button, ButtonGroup, Checkbox, Input, MultiSelect, Select, TableBodyCell, TableBodyRow, Tooltip } from "flowbite-svelte";
+	import { Alert, Button, ButtonGroup, Checkbox, Datepicker, Input, MultiSelect, Select, TableBodyCell, TableBodyRow } from "flowbite-svelte";
 	import { CirclePlusSolid, CloseCircleSolid, PenSolid } from "flowbite-svelte-icons";
 	import { initialTodo } from "../constants";
 	import { createToDoRequest, updateToDo, validateTodoRequest } from "../data/todo_crud";
@@ -14,14 +14,12 @@
     let newTodo = structuredClone(todo);
     // TODO clean up date time conversion mess on web also
     const date = newTodo.dueDate ? new Date(newTodo.dueDate) : new Date();
-    let todoDueDateEdit: string | undefined = 
-    `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCDate().toString().padStart(2, '0')}`;
-	let todoDueDateTimeEdit: string | undefined  = 
-    `${date.getUTCHours().toString().padStart(2, '0')}:${date.getUTCMinutes().toString().padStart(2, '0')}`;
+    let todoDueDateEdit: string | undefined = date.getDate() + '-' + (date.getMonth() + 1) + '-' + date.getFullYear();
+	let todoDueDateTimeEdit: string | undefined  = date.toTimeString().slice(0, 5);
     let todoTags: string[] = todo.tags ? todo.tags.map(tag => tag.name) : [];
 
-    let todoDueDate: string | undefined = submitLabel === "Add" ? undefined : todoDueDateEdit;
-    let todoDueDateTime: string | undefined = submitLabel === "Add" ? undefined : todoDueDateTimeEdit;
+    let todoDueDate: Date | undefined = undefined;
+    let todoDueDateTime: string | undefined = undefined;
 
     const numberOfColumns = Object.keys(todo).length + 1;
     let alertMessage: string | undefined  = undefined;
@@ -41,6 +39,7 @@
 		const validationMessage = await validateTodoRequest(newTodo);
 		if (validationMessage && validationMessage !== 'success') alertMessage = validationMessage;
         if (!todoDueDate && todoDueDateTime) alertMessage = 'Due date is required when time is set';
+        if (newTodo.difficulty && (newTodo.difficulty < 1 || newTodo.difficulty > 5 )) alertMessage = 'Difficulty must be between 1 and 5';
 
         if (alertMessage) {
             openAlert = true;
@@ -53,11 +52,22 @@
         return true;
     }
 
+    function joinDueDateWithTime() {
+        if (todoDueDateTime && todoDueDate) {
+            const time = todoDueDateTime.split(':').map(Number);
+            todoDueDate.setHours(todoDueDate.getHours() + time[0]);
+            todoDueDate.setMinutes(todoDueDate.getMinutes() + time[1]);
+            return todoDueDate;
+        }
+        else {
+            return todoDueDate;
+        }
+    }
+
 	async function createToDo() {
         const isTodoValid = await validateTodo();
-		if (isTodoValid) {
-            todoDueDateTime = todoDueDateTime ? todoDueDateTime : "00:00";
-            if (todoDueDateTime) newTodo.dueDate = new Date(todoDueDate + ' ' + todoDueDateTime);
+		if (isTodoValid) { 
+            newTodo.dueDate = joinDueDateWithTime();
             newTodo.tags = $tags.filter(tag => todoTags.includes(tag.name))
             await createToDoRequest(newTodo);
             // adding new todo to the store results in missing todo id from database
@@ -69,57 +79,54 @@
 </script>
 
 <TableBodyRow>
-    <TableBodyCell class="!p-4">
+    <TableBodyCell class="w-5">
         <Checkbox disabled />
     </TableBodyCell>
     <TableBodyCell>
         <Input
             id="todo-description"
-            placeholder="Type todo description"
             size="sm"
             color={openAlert && alertMessage?.includes("Description") ? 'red' : undefined}
             bind:value={newTodo.description}
         />
     </TableBodyCell>
-    <TableBodyCell class="w-40">
+    <TableBodyCell class="w-20">
         <Select 
             id="todo-priority"
-            placeholder="Select priority"
             bind:value={newTodo.priority} 
             size="sm">
             {#each Object.values(Priority) as priorityValue}
                 <option value={priorityValue}>{priorityValue.toUpperCase()}</option>
             {/each}
         </Select>
-        <Tooltip>Select priority</Tooltip>
     </TableBodyCell>
-    <TableBodyCell class="w-40">
+    <TableBodyCell class="w-20">
         <Input
             type="number"
             id="todo-difficulty"
             size="sm"
             min="1"
             max="5"
+            color={openAlert && alertMessage?.includes("Difficulty") ? 'red' : undefined}
             bind:value={newTodo.difficulty}/>
-        <Tooltip>Select difficulty (1-5)</Tooltip>
     </TableBodyCell>
     <TableBodyCell class="w-60">
-        <Input
-            type="date"
-            id="todo-due-date"
-            size="sm"
-            color={openAlert && alertMessage?.includes("Due date") ? 'red' : undefined}
-            bind:value={todoDueDate}/>
-        <Tooltip>Select due date</Tooltip>
+        <div class="flex items-center gap-2">
+        <Datepicker
+            id="todo-due-datepicker"
+            bind:value={todoDueDate}
+            color={openAlert && alertMessage?.includes("Due date") ? 'red' : undefined} 
+            />
         <Input
             type="time"
             id="todo-due-time"
             size="sm"
+            class="w-20"
             bind:value={todoDueDateTime}/>
+        </div>
     </TableBodyCell>
     <TableBodyCell class="w-80">
-        <!-- TODO: fix the issue with Multiselect hidden dropdown -->
-        <MultiSelect placeholder="Select tags" items={$tagItems} bind:value={todoTags} />
+        <MultiSelect items={$tagItems} bind:value={todoTags} />
     </TableBodyCell>
     <TableBodyCell>
         <ButtonGroup class="*:!ring-primary-700">
@@ -132,7 +139,7 @@
                 <Button onclick={async () => {$todos = await updateToDo({
                     ...newTodo, 
                     tags: $tags.filter(tag => todoTags.includes(tag.name)), 
-                    dueDate:  (todoDueDateTime && todoDueDate) ? new Date(todoDueDate + ' ' + todoDueDateTime) : undefined,
+                    dueDate:  joinDueDateWithTime(),
                     }, $todos);
                     onCancel();}}>
                     <PenSolid class="me-2 h-4 w-4" />

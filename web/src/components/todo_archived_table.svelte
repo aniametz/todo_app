@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, ButtonGroup, Checkbox, Table, TableBody, TableBodyCell, TableBodyRow } from "flowbite-svelte";
+	import { Button, ButtonGroup, Checkbox, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from "flowbite-svelte";
 	import { ArrowUpRightFromSquareSolid, CircleMinusSolid } from "flowbite-svelte-icons";
 	import { deleteToDo, updateToDo } from "../data/todo_crud";
 	import { archivedTodos, todos } from "../store";
@@ -9,6 +9,11 @@
 <div>
 
 <Table hoverable={true}>
+    <TableHead>
+        <TableHeadCell class="w-5"></TableHeadCell>
+        <TableHeadCell>Description</TableHeadCell>
+        <TableHeadCell>Actions</TableHeadCell>
+    </TableHead>
     <TableBody class="divide-y">
         {#each $archivedTodos as todo}
             <TableBodyRow>
@@ -16,7 +21,6 @@
                     ><Checkbox checked={todo.isDone} disabled />
                 </TableBodyCell>
                 <TableBodyCell>{todo.description}</TableBodyCell>
-                <TableBodyCell></TableBodyCell>
                 <TableBodyCell>
                     <ButtonGroup class="*:!ring-primary-700">
                         <Button onclick={async () => {$todos = await updateToDo({...todo, isArchived: false}, $todos)}}>
